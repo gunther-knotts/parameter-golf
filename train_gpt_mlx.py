@@ -335,16 +335,18 @@ class CausalSelfAttention(nn.Module):
 
 
 class MLP(nn.Module):
-    # Baseline MLP uses relu^2 instead of GELU/SiLU. It is cheap and works well in this setup.
+    # SwiGLU MLP: gate/up projections with SiLU gating, down projection.
+    # Hidden dim scaled to 2/3 of relu² hidden to maintain parameter parity
+    # (3 matrices at 2/3 width ≈ 2 matrices at full width).
     def __init__(self, dim: int, mlp_mult: int):
         super().__init__()
-        hidden = dim * mlp_mult
-        self.fc = CastedLinear(dim, hidden)
+        hidden = (2 * dim * mlp_mult) // 3
+        self.gate = CastedLinear(dim, hidden)
+        self.up = CastedLinear(dim, hidden)
         self.proj = CastedLinear(hidden, dim)
 
     def __call__(self, x: mx.array) -> mx.array:
-        x = nn.relu(self.fc(x))
-        return self.proj(x * x)
+        return self.proj(nn.silu(self.gate(x)) * self.up(x))
 
 
 class Block(nn.Module):
