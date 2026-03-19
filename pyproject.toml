@@ -1,0 +1,13 @@
+[project]
+name = "parameter-golf"
+version = "0.1.0"
+description = "OpenAI Parameter Golf challenge — local experimentation"
+requires-python = ">=3.12"
+dependencies = [
+    "datasets>=4.8.2",
+    "huggingface-hub>=1.7.1",
+    "mlx>=0.31.1",
+    "numpy>=2.4.3",
+    "sentencepiece>=0.2.1",
+    "tqdm>=4.67.3",
+]
